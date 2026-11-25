@@ -81,6 +81,36 @@
   #expNote{margin:8px 4px 0}
   #expNote.ok{color:var(--greenTx)}
   #dlReady{display:block;width:100%;border:0;border-radius:12px;background:var(--greenBg);color:var(--greenTx);font:inherit;font-size:16px;font-weight:600;padding:12px;margin-top:8px}
+  #tabs{margin-bottom:14px}
+  #stCard{padding:12px}
+  .who{font-size:16px;line-height:1.3}
+  .who small{display:block;font-size:13px;color:var(--sec)}
+  .who.bad{color:var(--red)}
+  .lbl{display:block;font-size:13px;color:var(--sec);margin:4px 4px 6px}
+  .valRow{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  #sNum,#sVal{width:120px;flex:none;font-size:30px;font-weight:700;text-align:center;padding:8px;font-variant-numeric:tabular-nums}
+  .res.big{font-size:18px;margin:0}
+  .chipsCard{padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px}
+  .chipsCard button{border:0;border-radius:999px;background:var(--fill);color:var(--tx);font:inherit;font-size:15px;font-weight:600;padding:5px 12px;font-variant-numeric:tabular-nums}
+  #sRecent{padding:0 16px}
+  .rc{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:.5px solid var(--line);font-size:15px}
+  .rc:last-child{border-bottom:0}
+  .rc b{min-width:32px;font-variant-numeric:tabular-nums}
+  .rc .v{margin-inline-start:auto;font-weight:600;font-variant-numeric:tabular-nums}
+  .rc .ok{color:var(--greenTx)} .rc .bad{color:var(--red)}
+  .tblWrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #tbl{border-collapse:collapse;width:100%;font-size:15px}
+  #tbl th{font-size:11px;font-weight:600;color:var(--sec);text-align:center;padding:10px 2px 6px;border-bottom:.5px solid var(--line);line-height:1.2}
+  #tbl td{border-bottom:.5px solid var(--line);padding:4px 2px;text-align:center;white-space:nowrap}
+  #tbl tr:last-child td{border-bottom:0}
+  #tbl .nm{position:sticky;right:0;background:var(--card);text-align:start;padding-inline:10px 6px;max-width:120px;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+  #tbl .nm b{font-variant-numeric:tabular-nums;color:var(--sec);font-weight:600;margin-inline-end:6px}
+  #tbl input{width:52px;padding:8px 2px;border-radius:8px;text-align:center;font-size:16px;font-variant-numeric:tabular-nums}
+  #tbl input.ok{background:var(--greenBg);color:var(--greenTx);font-weight:600}
+  #tbl input.bad{background:rgba(255,59,48,.14);color:var(--red);font-weight:600}
+  #tbl input.saving{opacity:.5}
+  #tq{margin-bottom:10px}
+  .hint{font-size:13px;color:var(--sec);margin:-4px 8px 14px}
   .hidden{display:none !important}
 </style>
 <link rel="stylesheet" href="app.css">
@@ -97,6 +127,9 @@
     </div>
   </div>
 
+  <div class="seg" id="tabs"><button data-v="reg" class="on">רישום</button><button data-v="station">תחנה</button><button data-v="table">טבלה</button></div>
+
+  <div id="tabReg">
   <div class="card hidden" id="missing"></div>
 
   <div class="card" id="form">
@@ -152,6 +185,34 @@
     <div class="rowBtns"><button id="resetBtn" class="del">איפוס למדידה הבאה</button></div>
     <div class="resetHint">נשמר עותק ארכיון בדרייב, ואז נמחקים השמות, התחנות, הזמנים והזינוקים. מאגר השמות נשאר.</div>
   </div>
+  </div>
+
+  <div id="tabStation" class="hidden">
+    <div class="seg wrap" id="stPick"></div>
+    <div class="card" id="stCard">
+      <div class="numRow">
+        <input id="sNum" inputmode="numeric" pattern="[0-9]*" placeholder="מספר" autocomplete="off" maxlength="3">
+        <div class="who" id="sWho"></div>
+      </div>
+      <div class="note hidden" id="sNote"></div>
+      <label class="lbl" for="sVal" id="sLbl"></label>
+      <div class="valRow">
+        <input id="sVal" autocomplete="off">
+        <span class="res big" id="sRes"></span>
+      </div>
+      <button class="wide" id="sSave" disabled>שמור והבא</button>
+    </div>
+    <div class="sh" id="sMissTitle"></div>
+    <div class="card chipsCard hidden" id="sMiss"></div>
+    <div class="sh hidden" id="sRecentTitle">נרשמו עכשיו בטלפון הזה</div>
+    <div class="card hidden" id="sRecent"></div>
+  </div>
+
+  <div id="tabTable" class="hidden">
+    <input id="tq" type="search" placeholder="חיפוש לפי שם, מספר או צוות" autocomplete="off">
+    <div class="hint">לוחצים על תא, מקלידים, ויוצאים מהתא כדי לשמור. ירוק עובר, אדום נכשל.</div>
+    <div class="card tblWrap"><table id="tbl"></table></div>
+  </div>
 </div>
 <div id="toast" class="hidden"></div>
 
@@ -189,6 +250,7 @@
     entries = s.entries || []; timed = s.timed || 0; byNum = {}; byKey = {};
     entries.forEach(function (e) { byNum[e[0]] = e; byKey[key(e[1], e[2])] = e; });
     if (loaded) setStatus(entries.length + ' רשומים' + (timed ? ' · ' + timed + ' סיומים בטיימר' : ''), false);
+    if (loaded && typeof renderStation === 'function') { renderStation(); renderTable(); }
   }
 
   function nextFree() { for (var n = 1; n <= 400; n++) if (!byNum[n]) return n; return 0; }
@@ -423,7 +485,7 @@
     var b = e.target.closest('button'); if (!b) return;
     company = b.getAttribute('data-c');
     try { localStorage.setItem(CKEY, company); } catch (err) {}
-    renderComp(); renderList();
+    renderComp(); renderList(); renderStation(); renderTable(true);
   });
   $('q').addEventListener('input', renderList);
   $('list').addEventListener('click', function (e) {
@@ -518,6 +580,203 @@
   });
 
 
+  var tab = 'reg', SKEY2 = 'rtStation' + SUF, stIdx = 0, recent = [], sSaving = false;
+  try { stIdx = Number(localStorage.getItem(SKEY2)) || 0; } catch (e) {}
+
+  function defs() {
+    if (!TRACKS) return [{ label: L.pushups || 'תוצאה', sec: false }];
+    return [
+      { label: 'ספרינטים', sec: true, key: 'sprint', lower: true },
+      { label: 'מתח', key: 'pull', w: true },
+      { label: 'מקבילים / לחיצות', short: 'מקבילים / חזה', key: 'st4v', st4: true },
+      { label: 'טראפבר', key: 'trap' }
+    ];
+  }
+  function defLabel(d, t) {
+    if (d.st4 && t && t.st4) return t.st4;
+    if (d.w && t && t.pullW) return 'מתח ' + t.pullW;
+    if (d.key === 'trap') return 'טראפבר 80 ק"ג';
+    if (d.sec) return 'ספרינטים (שניות)';
+    return d.label;
+  }
+  function valOf(e, i) { return TRACKS ? e[6 + i] : e[5]; }
+  function gradeOf(e, i, v) {
+    if (!TRACKS || v === '' || v === null || v === undefined) return '';
+    var d = defs()[i], t = trackBy[e[5]];
+    return t ? grade(Number(v), t[d.key], d.lower) : '';
+  }
+  function parseVal(i, s) { return defs()[i].sec ? parseSec(s) : parseReps(s); }
+
+  function setTab(t) {
+    tab = t; setSeg('tabs', t);
+    $('tabReg').classList.toggle('hidden', t !== 'reg');
+    $('tabStation').classList.toggle('hidden', t !== 'station');
+    $('tabTable').classList.toggle('hidden', t !== 'table');
+    try { history.replaceState(null, '', t === 'reg' ? location.pathname + location.search : '#' + t); } catch (e) {}
+    if (t === 'station') { renderStation(); setTimeout(function () { $('sNum').focus(); }, 50); }
+    if (t === 'table') renderTable(true);
+  }
+  $('tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (b) setTab(b.getAttribute('data-v'));
+  });
+
+
+  function renderStationPick() {
+    var ds = defs();
+    $('stPick').classList.toggle('hidden', ds.length < 2);
+    $('stPick').innerHTML = ds.map(function (d, i) {
+      return '<button data-v="' + i + '"' + (i === stIdx ? ' class="on"' : '') + '>' + esc(d.label) + '</button>';
+    }).join('');
+  }
+  $('stPick').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    stIdx = Number(b.getAttribute('data-v'));
+    try { localStorage.setItem(SKEY2, String(stIdx)); } catch (err) {}
+    renderStationPick(); renderStation(); $('sNum').focus();
+  });
+
+  function sCadet() { var n = Number($('sNum').value); return n ? byNum[n] || null : null; }
+
+  function renderStation() {
+    if (!loaded) return;
+    if (stIdx >= defs().length) stIdx = 0;
+    var d = defs()[stIdx], e = sCadet(), n = $('sNum').value;
+    var t = e && TRACKS ? trackBy[e[5]] : null;
+    if (!n) { $('sWho').textContent = ''; $('sWho').className = 'who'; }
+    else if (!e) { $('sWho').textContent = 'אין רישום למספר ' + n; $('sWho').className = 'who bad'; }
+    else {
+      $('sWho').className = 'who';
+      $('sWho').innerHTML = '✓ ' + esc(e[1]) + '<small>צוות ' + esc(e[2]) + (TRACKS ? ' · ' + esc(e[5] || 'חסר מסלול') : '') + '</small>';
+    }
+    var old = e ? valOf(e, stIdx) : '';
+    $('sNote').textContent = old !== '' && old !== undefined ? 'כבר רשום: ' + old + '. שמירה תחליף את התוצאה.' : '';
+    $('sNote').classList.toggle('hidden', !$('sNote').textContent);
+    $('sLbl').textContent = defLabel(d, t) + (t && d.key ? ' · עובר ' + (d.lower ? 'עד ' : 'מ-') + fmtTh(d, t[d.key][0]) + ', מצטיין ' + (d.lower ? 'עד ' : 'מ-') + fmtTh(d, t[d.key][1]) : '');
+    $('sVal').setAttribute('inputmode', d.sec ? 'decimal' : 'numeric');
+    $('sVal').placeholder = d.sec ? '0:52' : 'חזרות';
+    var v = parseVal(stIdx, $('sVal').value);
+    var g = v === null ? 'לא תקין' : e ? gradeOf(e, stIdx, v) : '';
+    $('sRes').textContent = g;
+    $('sRes').className = 'res big' + (g === 'מצטיין' || g === 'עובר' ? ' ok' : g ? ' bad' : '');
+    $('sSave').disabled = sSaving || !e || v === null || v === '';
+    renderStationMissing();
+  }
+  function fmtTh(d, x) {
+    if (x === null || x === undefined) return '-';
+    if (!d.sec) return String(x);
+    return x >= 60 ? Math.floor(x / 60) + ':' + ('0' + Math.round(x % 60)).slice(-2) : String(x);
+  }
+
+  function renderStationMissing() {
+    var miss = entries.filter(function (e) {
+      if (company && teams[e[2]] !== company) return false;
+      var v = valOf(e, stIdx); return v === '' || v === undefined;
+    }).map(function (e) { return e[0]; }).sort(function (a, b) { return a - b; });
+    var where = company ? ' (' + L.company + ' ' + company + ')' : '';
+    $('sMissTitle').textContent = entries.length ? (miss.length ? 'חסרים בתחנה' + where + ': ' + miss.length : 'כל הרשומים קיבלו תוצאה בתחנה הזו') : '';
+    $('sMiss').innerHTML = miss.slice(0, 40).map(function (n) { return '<button data-n="' + n + '">' + n + '</button>'; }).join('') +
+      (miss.length > 40 ? '<span class="hint">ועוד ' + (miss.length - 40) + '</span>' : '');
+    $('sMiss').classList.toggle('hidden', !miss.length);
+  }
+  $('sMiss').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    $('sNum').value = b.getAttribute('data-n'); $('sVal').value = ''; renderStation(); $('sVal').focus();
+    window.scrollTo(0, 0);
+  });
+
+  function renderRecent() {
+    $('sRecent').innerHTML = recent.map(function (r) {
+      return '<div class="rc"><b>' + r[0] + '</b><span>' + esc(r[1]) + ' · ' + esc(r[2]) + '</span><span class="v' +
+        (r[4] === 'מצטיין' || r[4] === 'עובר' ? ' ok' : r[4] ? ' bad' : '') + '">' + esc(r[3]) + (r[4] ? ' · ' + r[4] : '') + '</span></div>';
+    }).join('');
+    $('sRecent').classList.toggle('hidden', !recent.length);
+    $('sRecentTitle').classList.toggle('hidden', !recent.length);
+  }
+
+  function saveResult(e, idx, v, done) {
+    google.script.run
+      .withSuccessHandler(function (r) {
+        if (r && r.state) setState(r.state);
+        if (r && r.ok) { done(true); return; }
+        toast(r && r.reason === 'moved' ? 'הרישום של מספר ' + e[0] + ' השתנה. בדוק ונסה שוב' : 'לא נשמר, בדוק את התוצאה');
+        done(false);
+      })
+      .withFailureHandler(function () { toast('אין חיבור, לא נשמר. נסה שוב'); done(false); })
+      .saveResultB(BAT, e[0], idx, v, e[1]);
+  }
+
+  function stationSave() {
+    if (sSaving) return;
+    var e = sCadet(), v = parseVal(stIdx, $('sVal').value);
+    if (!e || v === null || v === '') return;
+    var idx = stIdx, g = gradeOf(e, idx, v), t = TRACKS ? trackBy[e[5]] : null;
+    sSaving = true; $('sSave').textContent = 'שומר...'; renderStation();
+    saveResult(e, idx, v, function (ok) {
+      sSaving = false; $('sSave').textContent = 'שמור והבא';
+      if (ok) {
+        recent.unshift([e[0], e[1], defLabel(defs()[idx], t), v, g]); recent = recent.slice(0, 8);
+        toast(e[0] + ' · ' + e[1] + ' · ' + v + (g ? ' · ' + g : ''));
+        $('sNum').value = ''; $('sVal').value = ''; renderRecent(); $('sNum').focus();
+      }
+      renderStation();
+    });
+  }
+
+  $('sNum').addEventListener('input', function () {
+    $('sNum').value = $('sNum').value.replace(/[^0-9]/g, ''); $('sVal').value = ''; renderStation();
+  });
+  $('sVal').addEventListener('input', renderStation);
+  $('sNum').addEventListener('keydown', function (e) { if (e.key === 'Enter' && sCadet()) $('sVal').focus(); });
+  $('sVal').addEventListener('keydown', function (e) { if (e.key === 'Enter') stationSave(); });
+  $('sSave').addEventListener('click', stationSave);
+
+
+  var tableDirty = false;
+  function renderTable(force) {
+    if (!loaded || tab !== 'table') return;
+    if (!force && $('tbl').contains(document.activeElement)) { tableDirty = true; return; }
+    tableDirty = false;
+    var ds = defs(), q = $('tq').value.trim();
+    var html = '<tr><th class="nm">שם</th>' + ds.map(function (d) { return '<th>' + esc(d.short || d.label) + '</th>'; }).join('') + '</tr>';
+    var rows = entries.slice().sort(function (a, b) { return a[0] - b[0]; }).filter(function (e) {
+      if (company && teams[e[2]] !== company) return false;
+      return !q || e[1].indexOf(q) >= 0 || String(e[0]) === q || e[2] === q;
+    });
+    rows.forEach(function (e) {
+      html += '<tr><td class="nm"><b>' + e[0] + '</b>' + esc(e[1]) + '</td>';
+      ds.forEach(function (d, i) {
+        var v = valOf(e, i), g = gradeOf(e, i, v);
+        html += '<td><input data-n="' + e[0] + '" data-i="' + i + '" value="' + esc(v === undefined ? '' : v) + '" inputmode="' + (d.sec ? 'decimal' : 'numeric') +
+          '" class="' + (g === 'מצטיין' || g === 'עובר' ? 'ok' : g ? 'bad' : '') + '" autocomplete="off"></td>';
+      });
+      html += '</tr>';
+    });
+    if (!rows.length) html += '<tr><td colspan="' + (ds.length + 1) + '" class="empty">' + (entries.length ? 'לא נמצא רישום מתאים' : 'עדיין אין רשומים') + '</td></tr>';
+    $('tbl').innerHTML = html;
+  }
+  $('tq').addEventListener('input', function () { renderTable(true); });
+  $('tbl').addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.target.blur(); });
+  $('tbl').addEventListener('change', function (ev) {
+    var inp = ev.target; if (inp.tagName !== 'INPUT') return;
+    var e = byNum[Number(inp.getAttribute('data-n'))], idx = Number(inp.getAttribute('data-i'));
+    if (!e) return;
+    var v = parseVal(idx, inp.value), old = valOf(e, idx);
+    if (v === null) { toast('תוצאה לא תקינה'); inp.value = old === undefined ? '' : old; return; }
+    if (String(v) === String(old === undefined ? '' : old)) return;
+    inp.classList.add('saving');
+    saveResult(e, idx, v, function (ok) {
+      inp.classList.remove('saving');
+      var g = ok ? gradeOf(e, idx, v) : '';
+      inp.className = g === 'מצטיין' || g === 'עובר' ? 'ok' : g ? 'bad' : '';
+      if (!ok) inp.value = old === undefined ? '' : old;
+      renderTable();
+    });
+  });
+  $('tbl').addEventListener('focusout', function () {
+    setTimeout(function () { if (tableDirty && !$('tbl').contains(document.activeElement)) renderTable(true); }, 0);
+  });
+
+
   $('batLink').textContent = L.unit + ' · החלפה';
   $('mark').innerHTML = (L.marks || []).map(function (m, i) {
     return '<button data-v="' + esc(m[0]) + '"' + (i ? '' : ' class="on"') + '>' + esc(m[1]) + '</button>';
@@ -529,7 +788,9 @@
       tracks = r.tracks || []; trackBy = {};
       tracks.forEach(function (t) { trackBy[t.name] = t; });
       if (company && companies.indexOf(company) < 0) company = '';
-      loaded = true; renderTracks(); setState(r); renderComp(); resetForm(); renderMissing();
+      loaded = true; renderTracks(); renderStationPick(); setState(r); renderComp(); resetForm(); renderMissing();
+      var h = location.hash.replace('#', '');
+      if (h === 'station' || h === 'table') setTab(h);
     })
     .withFailureHandler(function () { setStatus('לא הצלחתי לטעון. בדוק חיבור ורענן את הדף.', true); })
     .getInitB(BAT);
