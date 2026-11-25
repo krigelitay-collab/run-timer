@@ -1,0 +1,6 @@
+/* תוספות לאפליקציה (מסך מלא באייפון ובאנדרואיד) מעל העיצוב של הדפים */
+html{-webkit-text-size-adjust:100%}
+#app{padding-top:calc(10px + env(safe-area-inset-top)) !important;padding-left:calc(16px + env(safe-area-inset-left)) !important;padding-right:calc(16px + env(safe-area-inset-right)) !important}
+body.timer #app{padding-bottom:calc(14px + env(safe-area-inset-bottom)) !important}
+body.names #app{padding-bottom:calc(40px + env(safe-area-inset-bottom)) !important}
+#toast{top:calc(14px + env(safe-area-inset-top)) !important}

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="טיימר">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<title>רישום שמות</title>
+<style>
+  :root{--bg:#f2f2f7;--card:#fff;--line:#e5e5ea;--tx:#1c1c1e;--sec:#8e8e93;--fill:#e9e9ee;--seg:#e3e3e8;--blue:#007aff;--greenTx:#248a3d;--greenBg:#e4f6e9;--red:#ff3b30;--warn:#b25000;--warnBg:#fff4e0}
+  @media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1c1c1e;--line:#38383a;--tx:#fff;--sec:#98989f;--fill:#2c2c2e;--seg:#2c2c2e;--blue:#0a84ff;--greenTx:#30d158;--greenBg:#12301b;--red:#ff453a;--warn:#ffb340;--warnBg:#2e2412}}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Arial,sans-serif;font-size:17px;touch-action:manipulation}
+  #app{max-width:560px;margin:0 auto;padding:10px 16px 40px}
+  .top{display:flex;align-items:center;gap:12px;margin:4px 4px 12px}
+  .logo{width:46px;height:46px;flex:none}
+  .logo img{width:100%;height:100%;object-fit:contain;display:block}
+  .top h1{font-size:28px;font-weight:700;letter-spacing:-0.4px;margin:0;line-height:1.1}
+  #status{font-size:13px;color:var(--sec);min-height:17px;margin-top:2px}
+  #status.warn{color:var(--warn)}
+  .sh{font-size:13px;color:var(--sec);margin:0 16px 6px}
+  .card{background:var(--card);border-radius:16px;margin-bottom:14px}
+  #missing{background:var(--warnBg);color:var(--warn);padding:10px 14px;font-size:15px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  #missing button{border:0;border-radius:999px;background:var(--card);color:var(--warn);font:inherit;font-size:15px;font-weight:600;padding:4px 12px}
+  #form{padding:12px}
+  #editBar{font-size:15px;font-weight:600;color:var(--blue);margin:2px 4px 10px}
+  .numRow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  input{font:inherit;color:var(--tx);border:0;outline:none;background:var(--fill);border-radius:12px;padding:12px 14px;width:100%}
+  input::placeholder{color:var(--sec)}
+  #num{width:120px;flex:none;font-size:30px;font-weight:700;text-align:center;padding:8px;font-variant-numeric:tabular-nums}
+  #nextBtn{border:0;border-radius:999px;background:var(--fill);color:var(--blue);font:inherit;font-size:15px;font-weight:500;padding:9px 14px}
+  .note{font-size:14px;color:var(--warn);margin:-4px 4px 10px}
+  .field{position:relative;margin-bottom:10px}
+  #sug{position:absolute;inset-inline:0;top:100%;margin-top:4px;background:var(--card);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:4;overflow:hidden}
+  #sug div{padding:11px 14px;border-bottom:.5px solid var(--line);font-size:16px}
+  #sug div:last-child{border-bottom:0}
+  #sug small{color:var(--sec);font-size:13px;margin-inline-start:8px}
+  .teamRow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  #team{width:120px;flex:none;text-align:center;font-weight:600}
+  #teamInfo{font-size:15px;color:var(--sec)}
+  #teamInfo.bad{color:var(--red)}
+  .seg{display:flex;background:var(--seg);border-radius:10px;padding:2px;margin-bottom:10px}
+  .seg button{flex:1;border:0;background:none;border-radius:8px;font:inherit;font-size:15px;font-weight:500;color:var(--tx);padding:8px 2px}
+  .seg button.on{background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+  button.wide{display:block;width:100%;border:0;border-radius:14px;font:inherit;font-size:17px;font-weight:600;padding:14px;color:#fff;background:var(--blue);margin-top:2px}
+  button.wide:disabled{background:var(--fill);color:var(--sec)}
+  .rowBtns{display:flex;gap:10px;margin-top:8px}
+  .rowBtns button{flex:1;border:0;border-radius:12px;background:var(--fill);font:inherit;font-size:16px;padding:11px;color:var(--blue)}
+  .rowBtns button.del{color:var(--red)}
+  #q{margin-bottom:10px}
+  #list{padding:0 16px}
+  .li{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:.5px solid var(--line);cursor:pointer}
+  .li:last-child{border-bottom:0}
+  .li.cur{background:var(--warnBg);margin:0 -16px;padding:11px 16px}
+  .badge{flex:none;min-width:44px;text-align:center;background:var(--greenBg);color:var(--greenTx);border-radius:999px;padding:5px 10px;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+  .li .n{font-size:17px}
+  .li .s{font-size:13px;color:var(--sec);margin-top:1px}
+  .li .e{margin-inline-start:auto;color:var(--blue);font-size:15px;flex:none}
+  .empty{color:var(--sec);text-align:center;padding:22px 6px;font-size:15px}
+  #toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);border-radius:999px;padding:10px 18px;
+    font-size:15px;font-weight:600;z-index:9;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+  .batLink{display:inline-block;font-size:13px;color:var(--blue);text-decoration:none;margin-top:2px}
+  .seg.wrap button{font-size:14px;line-height:1.2;padding:8px 4px}
+  #stations{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  #stations label{display:block;font-size:13px;color:var(--sec);margin:0 4px 4px}
+  #stations input{text-align:center;font-variant-numeric:tabular-nums}
+  .res{display:block;font-size:12px;font-weight:600;margin:4px 4px 0;min-height:15px}
+  .res.ok{color:var(--greenTx)}
+  .res.bad{color:var(--red)}
+  #exp,#resetCard{padding:12px}
+  #resetCard .rowBtns{margin-top:0}
+  .resetHint{font-size:13px;color:var(--sec);margin:8px 4px 0}
+  #expNote{margin:8px 4px 0}
+  #expNote.ok{color:var(--greenTx)}
+  #dlReady{display:block;width:100%;border:0;border-radius:12px;background:var(--greenBg);color:var(--greenTx);font:inherit;font-size:16px;font-weight:600;padding:12px;margin-top:8px}
+  .hidden{display:none !important}
+</style>
+<link rel="stylesheet" href="app.css">
+<script src="app.js"></script>
+</head>
+<body class="names">
+<div id="app">
+  <div class="top">
+    <div class="logo"><img data-logo alt=""></div>
+    <div>
+      <h1>רישום שמות</h1>
+      <a class="batLink" id="batLink" href="./"></a>
+      <div id="status">טוען...</div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="missing"></div>
+
+  <div class="card" id="form">
+    <div id="editBar" class="hidden"></div>
+    <div class="numRow">
+      <input id="num" inputmode="numeric" pattern="[0-9]*" placeholder="מספר" autocomplete="off" maxlength="3">
+      <button id="nextBtn" class="hidden"></button>
+    </div>
+    <div class="note hidden" id="numNote"></div>
+    <div class="field">
+      <input id="name" placeholder="שם מלא" autocomplete="off" autocapitalize="off" enterkeyhint="next">
+      <div id="sug" class="hidden"></div>
+    </div>
+    <div class="note hidden" id="nameNote"></div>
+    <div class="teamRow">
+      <input id="team" inputmode="numeric" pattern="[0-9]*" placeholder="צוות" autocomplete="off" maxlength="2">
+      <div id="teamInfo"></div>
+    </div>
+    <div class="seg" id="gender"><button data-v="ב">בן</button><button data-v="נ">בת</button></div>
+    <div class="seg" id="mark"></div>
+    <div class="seg wrap hidden" id="track"></div>
+    <div id="stations" class="hidden">
+      <div><label for="st0">ספרינטים (שניות)</label><input id="st0" inputmode="decimal" placeholder="0:52" autocomplete="off"><span class="res" id="r0"></span></div>
+      <div><label for="st1" id="l1">מתח</label><input id="st1" inputmode="numeric" pattern="[0-9]*" placeholder="חזרות" autocomplete="off"><span class="res" id="r1"></span></div>
+      <div><label for="st2" id="l2">מקבילים</label><input id="st2" inputmode="numeric" pattern="[0-9]*" placeholder="חזרות" autocomplete="off"><span class="res" id="r2"></span></div>
+      <div><label for="st3">טראפבר 80 ק"ג</label><input id="st3" inputmode="numeric" pattern="[0-9]*" placeholder="חזרות" autocomplete="off"><span class="res" id="r3"></span></div>
+    </div>
+    <button class="wide" id="saveBtn" disabled>שמור</button>
+    <div class="rowBtns hidden" id="editBtns">
+      <button id="cancelBtn">ביטול</button>
+      <button id="delBtn" class="del">מחק רישום</button>
+    </div>
+  </div>
+
+  <div class="sh" id="listTitle">רשומים</div>
+  <div class="seg" id="comp"></div>
+  <input id="q" type="search" placeholder="חיפוש לפי שם, מספר או צוות" autocomplete="off">
+  <div class="card" id="list"></div>
+
+  <div class="sh">ייצוא תוצאות לאקסל</div>
+  <div class="card" id="exp">
+    <input id="email" type="email" inputmode="email" placeholder="מייל לשליחה" autocomplete="email" autocapitalize="off" dir="ltr">
+    <div class="rowBtns">
+      <button id="mailBtn">שלח למייל</button>
+      <button id="dlBtn">הורד לטלפון</button>
+    </div>
+    <button id="dlReady" class="hidden"></button>
+    <div class="note hidden" id="expNote"></div>
+  </div>
+
+  <div class="sh">אחרי המדידה</div>
+  <div class="card" id="resetCard">
+    <div class="rowBtns"><button id="resetBtn" class="del">איפוס למדידה הבאה</button></div>
+    <div class="resetHint">נשמר עותק ארכיון בדרייב, ואז נמחקים השמות, התחנות, הזמנים והזינוקים. מאגר השמות נשאר.</div>
+  </div>
+</div>
+<div id="toast" class="hidden"></div>
+
+<script>
+  window.onerror = function (m, src, line) {
+    var el = document.getElementById('status');
+    if (el) { el.textContent = 'שגיאה: ' + m + ' (שורה ' + line + ')'; el.className = 'warn'; }
+  };
+  var BAT = APP.bat, TRACKS = APP.kind === 'tracks';
+  var SUF = '_' + BAT;
+  var L = APP.labels;
+  var CKEY = 'rtNamesCompany' + SUF, EKEY = 'rtExportEmail';
+  var teams = {}, companies = [], roster = [], entries = [], timed = 0, tracks = [], trackBy = {};
+  var byNum = {}, byKey = {};
+  var company = '', editNum = 0, saving = false, loaded = false, toastTimer = null, stTouched = false;
+  try { company = localStorage.getItem(CKEY) || ''; } catch (e) {}
+  try { document.getElementById('email').value = localStorage.getItem(EKEY) || ''; } catch (e) {}
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function key(name, team) { return name + '|' + team; }
+  function setStatus(t, warn) { $('status').textContent = t; $('status').className = warn ? 'warn' : ''; }
+  function toast(t) {
+    $('toast').textContent = t; $('toast').classList.remove('hidden');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { $('toast').classList.add('hidden'); }, 2600);
+  }
+  function setSeg(id, value) {
+    var b = $(id).querySelectorAll('button');
+    for (var i = 0; i < b.length; i++) b[i].classList.toggle('on', b[i].getAttribute('data-v') === value);
+  }
+  function getSeg(id) { var b = $(id).querySelector('button.on'); return b ? b.getAttribute('data-v') : null; }
+
+  function setState(s) {
+    if (!s) return;
+    entries = s.entries || []; timed = s.timed || 0; byNum = {}; byKey = {};
+    entries.forEach(function (e) { byNum[e[0]] = e; byKey[key(e[1], e[2])] = e; });
+    if (loaded) setStatus(entries.length + ' רשומים' + (timed ? ' · ' + timed + ' סיומים בטיימר' : ''), false);
+  }
+
+  function nextFree() { for (var n = 1; n <= 400; n++) if (!byNum[n]) return n; return 0; }
+
+
+  function parseSec(s) {
+    s = String(s).trim().replace(',', '.');
+    if (!s) return '';
+    var m = s.match(/^(\d+):(\d{1,2}(?:\.\d+)?)$/);
+    if (m) return Number(m[1]) * 60 + Number(m[2]);
+    return /^\d+(\.\d+)?$/.test(s) ? Number(s) : null;
+  }
+  function parseReps(s) { s = String(s).trim(); if (!s) return ''; return /^\d+$/.test(s) ? Number(s) : null; }
+  function stationValues() {
+    return [parseSec($('st0').value), parseReps($('st1').value), parseReps($('st2').value), parseReps($('st3').value)];
+  }
+  function grade(v, th, lower) {
+    if (v === '' || v === null || !th || th[0] === null) return '';
+    if (lower) return v <= th[1] ? 'מצטיין' : v <= th[0] ? 'עובר' : 'נכשל';
+    return v >= th[1] ? 'מצטיין' : v >= th[0] ? 'עובר' : 'נכשל';
+  }
+  function renderTracks() {
+    var html = '';
+    tracks.forEach(function (t) { html += '<button data-v="' + esc(t.name) + '">' + esc(t.name.replace(/\+/g, ' / ')) + '</button>'; });
+    $('track').innerHTML = html;
+  }
+  function renderStations() {
+    if (!TRACKS) return;
+    var t = trackBy[getSeg('track')], v = stationValues();
+    $('l1').textContent = 'מתח' + (t && t.pullW ? ' ' + t.pullW : '');
+    $('l2').textContent = t && t.st4 ? t.st4 : 'מקבילים / לחיצות חזה';
+    var keys = [['sprint', true], ['pull'], ['st4v'], ['trap']];
+    for (var i = 0; i < 4; i++) {
+      var g = v[i] === null ? 'לא תקין' : t ? grade(v[i], t[keys[i][0]], keys[i][1]) : (v[i] !== '' ? 'בחר מסלול' : '');
+      $('r' + i).textContent = g;
+      $('r' + i).className = 'res' + (g === 'מצטיין' || g === 'עובר' ? ' ok' : g ? ' bad' : '');
+    }
+  }
+  function stationsSummary(e) {
+    var n = 0; for (var i = 6; i <= 9; i++) if (e[i] !== '' && e[i] !== undefined) n++;
+    return n + '/4 תחנות';
+  }
+
+
+  function renderMissing() {
+    var miss = [];
+    for (var n = 1; n <= timed && miss.length < 12; n++) if (!byNum[n]) miss.push(n);
+    var html = miss.length ? '<span>יש זמן ואין שם:</span>' : '';
+    miss.forEach(function (n) { html += '<button data-n="' + n + '">' + n + '</button>'; });
+    $('missing').innerHTML = html; $('missing').classList.toggle('hidden', !miss.length);
+  }
+
+  function renderComp() {
+    var html = '<button data-c=""' + (company === '' ? ' class="on"' : '') + '>הכל</button>';
+    companies.forEach(function (c) {
+      html += '<button data-c="' + esc(c) + '"' + (company === c ? ' class="on"' : '') + '>' + esc(c) + '</button>';
+    });
+    $('comp').innerHTML = html;
+  }
+
+  function renderList() {
+    var q = $('q').value.trim(), html = '', count = 0;
+    var list = entries.slice().sort(function (a, b) { return b[0] - a[0]; });
+    list.forEach(function (e) {
+      if (company && teams[e[2]] !== company) return;
+      if (q && e[1].indexOf(q) < 0 && String(e[0]) !== q && e[2] !== q) return;
+      count++;
+      var sub = 'צוות ' + e[2] + (teams[e[2]] ? ' · ' + L.company + ' ' + teams[e[2]] : '') + ' · ' + (e[3] === 'נ' ? 'בת' : e[3] === 'ב' ? 'בן' : 'חסר מין') + (e[4] ? ' · ' + e[4] : '');
+      if (TRACKS) sub += ' · ' + (e[5] || 'חסר מסלול') + ' · ' + stationsSummary(e);
+      html += '<div class="li' + (e[0] === editNum ? ' cur' : '') + '" data-n="' + e[0] + '"><span class="badge">' + e[0] + '</span><div><div class="n">' +
+        esc(e[1]) + '</div><div class="s">' + esc(sub) + '</div></div><span class="e">עדכון</span></div>';
+    });
+    if (!loaded) html = '';
+    else if (!entries.length) html = '<div class="empty">עדיין אין רשומים</div>';
+    else if (!count) html = '<div class="empty">לא נמצא רישום מתאים</div>';
+    $('list').innerHTML = html;
+    $('listTitle').textContent = 'רשומים' + (loaded ? ' (' + count + ')' : '');
+  }
+
+  function renderNext() {
+    var n = nextFree();
+    $('nextBtn').classList.toggle('hidden', !!editNum || !n || !loaded);
+    $('nextBtn').textContent = 'הבא הפנוי: ' + n;
+    $('nextBtn').setAttribute('data-n', n);
+  }
+
+
+  function check() {
+    var n = Number($('num').value), name = $('name').value.trim(), team = $('team').value.trim();
+    var taken = byNum[n] && n !== editNum ? byNum[n] : null;
+    $('numNote').textContent = taken ? 'מספר ' + n + ' כבר רשום ל' + taken[1] : '';
+    $('numNote').classList.toggle('hidden', !taken);
+    var dup = name && team && byKey[key(name, team)];
+    if (dup && dup[0] === editNum) dup = null;
+    $('nameNote').textContent = dup ? name + ' כבר רשום כמספר ' + dup[0] : '';
+    $('nameNote').classList.toggle('hidden', !dup);
+    var known = !!teams[team];
+    $('teamInfo').textContent = !team ? '' : known ? L.company + ' ' + teams[team] : 'אין צוות כזה';
+    $('teamInfo').className = team && !known ? 'bad' : '';
+    var trackOk = !TRACKS || !!trackBy[getSeg('track')];
+    var stOk = !TRACKS || stationValues().indexOf(null) < 0;
+    renderStations();
+    $('saveBtn').disabled = saving || !loaded || !(n >= 1 && n <= 400) || !name || !known || getSeg('gender') === null || !trackOk || !stOk;
+  }
+
+  function setStations(vals) {
+    for (var i = 0; i < 4; i++) $('st' + i).value = vals && vals[i] !== undefined ? vals[i] : '';
+  }
+
+  function resetForm() {
+    editNum = 0; stTouched = false;
+    $('num').value = ''; $('name').value = ''; $('team').value = '';
+    setSeg('gender', '__none__'); setSeg('mark', ''); setSeg('track', '__none__'); setStations(null);
+    $('sug').classList.add('hidden');
+    $('editBar').classList.add('hidden'); $('editBtns').classList.add('hidden');
+    $('saveBtn').textContent = 'שמור';
+    check(); renderNext(); renderList();
+  }
+
+  function startEdit(n) {
+    var e = byNum[n]; if (!e) return;
+    editNum = n; stTouched = false;
+    $('num').value = e[0]; $('name').value = e[1]; $('team').value = e[2];
+    setSeg('gender', e[3] || '__none__'); setSeg('mark', e[4] || '');
+    if (TRACKS) { setSeg('track', e[5] || '__none__'); setStations(e.slice(6, 10)); }
+    $('editBar').textContent = 'עדכון רישום: מספר ' + e[0] + ', ' + e[1];
+    $('editBar').classList.remove('hidden'); $('editBtns').classList.remove('hidden');
+    $('saveBtn').textContent = 'עדכן';
+    $('sug').classList.add('hidden');
+    check(); renderNext(); renderList();
+    window.scrollTo(0, 0);
+  }
+
+  function renderSug() {
+    var q = $('name').value.trim(), html = '', shown = 0;
+    if (q.length >= 2) {
+      for (var i = 0; i < roster.length && shown < 5; i++) {
+        var r = roster[i];
+        if (r[0].indexOf(q) < 0 || r[0] === q || byKey[key(r[0], r[1])]) continue;
+        shown++;
+        html += '<div data-i="' + i + '">' + esc(r[0]) + '<small>צוות ' + esc(r[1]) + (TRACKS && r[3] ? ' · ' + esc(r[3]) : '') + '</small></div>';
+      }
+    }
+    $('sug').innerHTML = html; $('sug').classList.toggle('hidden', !shown);
+  }
+
+  function doSave(forceIt) {
+    if (saving) return;
+    check(); if ($('saveBtn').disabled) return;
+    var e = { num: Number($('num').value), name: $('name').value.trim(), team: $('team').value.trim(),
+      gender: getSeg('gender'), mark: getSeg('mark') || '', prevNum: editNum, force: !!forceIt };
+    if (TRACKS) {
+      e.track = getSeg('track');
+      if (editNum || stTouched) e.stations = stationValues();
+    }
+    var label = editNum ? 'עדכן' : 'שמור';
+    saving = true; $('saveBtn').disabled = true; $('saveBtn').textContent = 'שומר...';
+    google.script.run
+      .withSuccessHandler(function (r) {
+        saving = false; $('saveBtn').textContent = label;
+        if (r && r.state) setState(r.state);
+        if (r && r.ok) {
+          if (!roster.some(function (x) { return x[0] === e.name && x[1] === e.team; })) roster.push([e.name, e.team, e.gender, e.track || '']);
+          toast(e.num + ' · ' + e.name + (e.prevNum ? ' עודכן' : ' נשמר'));
+          resetForm(); renderMissing(); $('num').focus();
+          return;
+        }
+        check(); renderList(); renderMissing();
+        if (r && r.reason === 'num_taken') {
+          if (confirm('מספר ' + e.num + ' כבר רשום ל' + r.by + '. להחליף אותו ב' + e.name + '?')) doSave(true);
+        } else if (r && r.reason === 'cadet_taken') {
+          if (confirm(e.name + ' כבר רשום כמספר ' + r.num + '. להעביר למספר ' + e.num + '?')) doSave(true);
+        } else if (r && r.reason === 'bad_team') {
+          toast('אין צוות כזה');
+        } else if (r && r.reason === 'bad_track') {
+          toast('בחר מסלול');
+        } else {
+          toast('לא נשמר, בדוק את הפרטים');
+        }
+      })
+      .withFailureHandler(function () {
+        saving = false; $('saveBtn').textContent = label; check();
+        toast('אין חיבור, לא נשמר. נסה שוב');
+      })
+      .saveEntryB(BAT, e);
+  }
+
+  $('num').addEventListener('input', function () { $('num').value = $('num').value.replace(/[^0-9]/g, ''); check(); });
+  $('team').addEventListener('input', function () { $('team').value = $('team').value.replace(/[^0-9]/g, ''); check(); });
+  $('name').addEventListener('input', function () { renderSug(); check(); });
+  $('name').addEventListener('blur', function () { setTimeout(function () { if (document.activeElement !== $('name')) $('sug').classList.add('hidden'); }, 250); });
+  $('num').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('name').focus(); });
+  $('name').addEventListener('keydown', function (e) { if (e.key === 'Enter') { $('sug').classList.add('hidden'); $('team').focus(); } });
+  $('team').addEventListener('keydown', function (e) { if (e.key === 'Enter') doSave(false); });
+  [0, 1, 2, 3].forEach(function (i) {
+    $('st' + i).addEventListener('input', function () { stTouched = true; check(); });
+  });
+  $('sug').addEventListener('click', function (e) {
+    var d = e.target.closest('div[data-i]'); if (!d) return;
+    var r = roster[Number(d.getAttribute('data-i'))];
+    $('name').value = r[0]; $('team').value = r[1]; if (r[2]) setSeg('gender', r[2]);
+    if (TRACKS && r[3] && trackBy[r[3]]) setSeg('track', r[3]);
+    $('sug').classList.add('hidden'); check();
+    if (!$('num').value) $('num').focus();
+  });
+  ['gender', 'mark', 'track'].forEach(function (id) {
+    $(id).addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (b) { setSeg(id, b.getAttribute('data-v')); check(); }
+    });
+  });
+  $('nextBtn').addEventListener('click', function () { $('num').value = $('nextBtn').getAttribute('data-n'); check(); $('name').focus(); });
+  $('missing').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (editNum) resetForm();
+    $('num').value = b.getAttribute('data-n'); check(); $('name').focus(); window.scrollTo(0, 0);
+  });
+  $('saveBtn').addEventListener('click', function () { doSave(false); });
+  $('cancelBtn').addEventListener('click', resetForm);
+  $('delBtn').addEventListener('click', function () {
+    var e = byNum[editNum]; if (!e || saving) return;
+    if (!confirm('למחוק את הרישום של ' + e[1] + ' (מספר ' + e[0] + ')? ' + 'גם ' + L.manual + ' שלו יימחקו.')) return;
+    saving = true;
+    google.script.run
+      .withSuccessHandler(function (r) {
+        saving = false; if (r && r.state) setState(r.state);
+        toast('הרישום נמחק'); resetForm(); renderMissing();
+      })
+      .withFailureHandler(function () { saving = false; toast('אין חיבור, לא נמחק'); })
+      .removeEntryB(BAT, e[0], e[1]);
+  });
+  $('comp').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    company = b.getAttribute('data-c');
+    try { localStorage.setItem(CKEY, company); } catch (err) {}
+    renderComp(); renderList();
+  });
+  $('q').addEventListener('input', renderList);
+  $('list').addEventListener('click', function (e) {
+    var li = e.target.closest('.li'); if (li) startEdit(Number(li.getAttribute('data-n')));
+  });
+
+
+  var exporting = false, fileReady = null;
+  function expNote(t, ok) { $('expNote').textContent = t; $('expNote').className = 'note' + (ok ? ' ok' : '') + (t ? '' : ' hidden'); }
+  function setExporting(on, btn, text) {
+    exporting = on; $('mailBtn').disabled = on; $('dlBtn').disabled = on;
+    if (btn) btn.textContent = text;
+  }
+  $('mailBtn').addEventListener('click', function () {
+    if (exporting) return;
+    var email = $('email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { expNote('צריך כתובת מייל תקינה'); $('email').focus(); return; }
+    try { localStorage.setItem(EKEY, email); } catch (e) {}
+    setExporting(true, $('mailBtn'), 'שולח...'); expNote('');
+    google.script.run
+      .withSuccessHandler(function (r) {
+        setExporting(false, $('mailBtn'), 'שלח למייל');
+        if (r && r.ok) expNote('הקובץ נשלח ל-' + r.sent, true);
+        else expNote('כתובת מייל לא תקינה');
+      })
+      .withFailureHandler(function (err) {
+        setExporting(false, $('mailBtn'), 'שלח למייל');
+        expNote('השליחה נכשלה' + (err && err.message ? ': ' + err.message : '') + '. נסה שוב');
+      })
+      .exportResultsB(BAT, email);
+  });
+  $('dlBtn').addEventListener('click', function () {
+    if (exporting) return;
+    setExporting(true, $('dlBtn'), 'מכין קובץ...'); expNote(''); $('dlReady').classList.add('hidden');
+    google.script.run
+      .withSuccessHandler(function (r) {
+        setExporting(false, $('dlBtn'), 'הורד לטלפון');
+        if (!r || !r.ok) { expNote('לא הצלחתי להכין קובץ'); return; }
+        var bin = atob(r.data), arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        fileReady = { name: r.name, blob: new Blob([arr], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }) };
+        $('dlReady').textContent = 'הקובץ מוכן: לחץ לשמירה או שיתוף';
+        $('dlReady').classList.remove('hidden');
+      })
+      .withFailureHandler(function (err) {
+        setExporting(false, $('dlBtn'), 'הורד לטלפון');
+        expNote('הכנת הקובץ נכשלה' + (err && err.message ? ': ' + err.message : '') + '. נסה שוב');
+      })
+      .exportResultsB(BAT, '');
+  });
+  $('dlReady').addEventListener('click', function () {
+    if (!fileReady) return;
+    var f = fileReady, file = null;
+    try { file = new File([f.blob], f.name, { type: f.blob.type }); } catch (e) {}
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], title: f.name }).catch(function (err) {
+        if (!err || err.name !== 'AbortError') saveLink(f);
+      });
+      return;
+    }
+    saveLink(f);
+  });
+  function saveLink(f) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(f.blob); a.download = f.name; a.target = '_blank';
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 60000);
+    expNote('הקובץ נשמר בהורדות', true);
+  }
+
+
+  var BAT_NAME = APP.batName;
+  $('resetBtn').addEventListener('click', function () {
+    if (saving || exporting) return;
+    if (!confirm('לאפס את ' + L.unit + ' למדידה הבאה?\n\nכדאי קודם לייצא את התוצאות לאקסל. יישמר עותק ארכיון בדרייב, ואז יימחקו ' + entries.length + ' רשומים, התחנות, הזמנים והזינוקים.')) return;
+    var typed = prompt('כדי לאשר, כתוב את השם: ' + BAT_NAME);
+    if (typed === null) return;
+    if (typed.trim() !== BAT_NAME) { toast('השם לא תואם, לא אופס'); return; }
+    saving = true; $('resetBtn').disabled = true; $('resetBtn').textContent = 'מאפס...';
+    google.script.run
+      .withSuccessHandler(function (r) {
+        saving = false; $('resetBtn').disabled = false; $('resetBtn').textContent = 'איפוס למדידה הבאה';
+        if (!r || !r.ok) { toast('לא אופס'); return; }
+        setState(r.state); resetForm(); renderMissing();
+        toast('אופס. הארכיון נשמר בדרייב');
+      })
+      .withFailureHandler(function (err) {
+        saving = false; $('resetBtn').disabled = false; $('resetBtn').textContent = 'איפוס למדידה הבאה';
+        toast('האיפוס נכשל' + (err && err.message ? ': ' + err.message : ''));
+      })
+      .resetFromAppB(BAT, typed.trim());
+  });
+
+
+  $('batLink').textContent = L.unit + ' · החלפה';
+  $('mark').innerHTML = (L.marks || []).map(function (m, i) {
+    return '<button data-v="' + esc(m[0]) + '"' + (i ? '' : ' class="on"') + '>' + esc(m[1]) + '</button>';
+  }).join('');
+  if (TRACKS) { $('track').classList.remove('hidden'); $('stations').classList.remove('hidden'); }
+  google.script.run
+    .withSuccessHandler(function (r) {
+      teams = r.teams || {}; companies = r.companies || []; roster = r.roster || [];
+      tracks = r.tracks || []; trackBy = {};
+      tracks.forEach(function (t) { trackBy[t.name] = t; });
+      if (company && companies.indexOf(company) < 0) company = '';
+      loaded = true; renderTracks(); setState(r); renderComp(); resetForm(); renderMissing();
+    })
+    .withFailureHandler(function () { setStatus('לא הצלחתי לטעון. בדוק חיבור ורענן את הדף.', true); })
+    .getInitB(BAT);
+
+  setInterval(function () {
+    if (!loaded || saving || document.visibilityState !== 'visible') return;
+    google.script.run.withSuccessHandler(function (s) {
+      if (saving || !s) return;
+      if (JSON.stringify(s.entries) === JSON.stringify(entries) && s.timed === timed) return;
+      setState(s); renderList(); renderMissing(); renderNext(); check();
+    }).getStateB(BAT);
+  }, 6000);
+
+  renderComp(); check();
+</script>
+</body>
+</html>

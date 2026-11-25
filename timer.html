@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="טיימר">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<title>טיימר</title>
+<style>
+  :root{--bg:#f2f2f7;--card:#fff;--line:#e5e5ea;--tx:#1c1c1e;--sec:#8e8e93;--fill:#e9e9ee;--blue:#007aff;--green:#34c759;--greenTx:#248a3d;--greenBg:#e4f6e9;--red:#ff3b30;--warn:#b25000}
+  @media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1c1c1e;--line:#38383a;--tx:#fff;--sec:#98989f;--fill:#2c2c2e;--blue:#0a84ff;--green:#30d158;--greenTx:#30d158;--greenBg:#12301b;--red:#ff453a;--warn:#ffb340}}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Arial,sans-serif;font-size:17px;
+    display:flex;flex-direction:column;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+  #app{flex:1;display:flex;flex-direction:column;min-height:0;width:100%;max-width:560px;margin:0 auto;padding:10px 16px 14px}
+  .top{display:flex;align-items:center;gap:12px;margin:4px 4px 12px}
+  .logo{width:46px;height:46px;flex:none}
+  .logo img{width:100%;height:100%;object-fit:contain;display:block}
+  .top h1{font-size:28px;font-weight:700;letter-spacing:-0.4px;margin:0;line-height:1.1}
+  #status{font-size:13px;color:var(--sec);min-height:17px;margin-top:2px}
+  #status.warn{color:var(--warn)}
+  .sh{font-size:13px;color:var(--sec);margin:0 16px 6px}
+  .card{background:var(--card);border-radius:16px;padding:12px;margin-bottom:12px}
+  #chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;background:var(--fill);color:var(--tx);font:inherit;font-size:15px;font-weight:500;padding:9px 14px;
+    font-variant-numeric:tabular-nums}
+  .chip.sel{background:var(--blue);color:#fff}
+  .chip.on{background:var(--greenBg);color:var(--greenTx)}
+  .chip.on span{direction:ltr;unicode-bidi:isolate;font-weight:600}
+  .chip.arm{background:var(--red);color:#fff}
+  button.wide{display:block;width:100%;border:0;border-radius:14px;font:inherit;font-size:17px;font-weight:600;padding:14px;color:#fff;background:var(--blue)}
+  button.wide:disabled{background:var(--fill);color:var(--sec)}
+  #startBtn{margin-top:12px}
+  #finishBtn{flex:0 0 30%;min-height:150px;border:0;border-radius:28px;background:var(--green);color:#fff;font:inherit;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;margin-bottom:12px;
+    box-shadow:0 8px 20px rgba(52,199,89,.28);transition:transform .08s ease,filter .08s ease}
+  #finishBtn b{font-size:46px;font-weight:700;line-height:1.05}
+  #finishBtn small{font-size:17px;font-weight:500;opacity:.92;font-variant-numeric:tabular-nums}
+  #finishBtn:active{transform:scale(.975);filter:brightness(.94)}
+  #finishBtn:disabled{background:var(--fill);color:var(--sec);box-shadow:none}
+  #row{display:flex;gap:10px;margin-bottom:12px}
+  #row button{flex:1;border:0;border-radius:14px;background:var(--card);color:var(--blue);font:inherit;font-size:16px;font-weight:500;padding:13px 6px}
+  #row button.danger{color:var(--red)}
+  #row button.arm{background:var(--red);color:#fff}
+  #list{flex:1;min-height:70px;overflow-y:auto;background:var(--card);border-radius:16px;padding:0 16px}
+  .li{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:.5px solid var(--line);font-variant-numeric:tabular-nums}
+  .li:last-child{border-bottom:0}
+  .li b{font-size:19px;font-weight:600}
+  .li span{direction:ltr;color:var(--sec);font-size:17px}
+  .empty{color:var(--sec);text-align:center;padding:22px 0;font-size:15px}
+  #done{text-align:center;padding:22px 10px}
+  #done b{display:block;font-size:22px;margin-bottom:4px}
+  #done span{color:var(--sec);font-size:15px}
+  .batLink{display:inline-block;font-size:13px;color:var(--blue);text-decoration:none;margin-top:2px}
+  #cd{text-align:center;padding:4px 0 2px}
+  #cdNum{font-size:96px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:var(--red)}
+  #cdNum.go{color:var(--green)}
+  #cdGroups{font-size:15px;color:var(--sec);margin:6px 0 12px}
+  #cdCancel{border:0;border-radius:14px;background:var(--fill);color:var(--red);font:inherit;font-size:16px;font-weight:600;padding:12px;width:100%}
+  .hidden{display:none !important}
+</style>
+<link rel="stylesheet" href="app.css">
+<script src="app.js"></script>
+</head>
+<body class="timer">
+<div id="app">
+  <div class="top">
+    <div class="logo"><img data-logo alt=""></div>
+    <div>
+      <h1>טיימר</h1>
+      <a class="batLink" id="batLink" href="./"></a>
+      <div id="status"></div>
+    </div>
+  </div>
+
+  <div id="startCard">
+    <div class="sh" id="startHint">זינוק: בוחרים קבוצה ולוחצים ברגע הזינוק</div>
+    <div class="card hidden" id="cd">
+      <div id="cdNum">10</div>
+      <div id="cdGroups"></div>
+      <button id="cdCancel">ביטול זינוק</button>
+    </div>
+    <div class="card" id="pickCard">
+      <div id="chips"></div>
+      <button class="wide" id="startBtn" disabled>בחר קבוצה לזינוק</button>
+    </div>
+  </div>
+
+  <button id="finishBtn" disabled><b>סיום</b><small id="nextNum">אחרי הזינוק הראשון</small></button>
+
+  <div class="card hidden" id="done"></div>
+
+  <div id="row">
+    <button id="undo" class="hidden">בטל אחרון</button>
+    <button id="end" class="hidden danger">סיום מדידה</button>
+    <button id="reset" class="hidden danger">מדידה חדשה</button>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<script>
+  window.onerror = function (m, src, line) {
+    var el = document.getElementById('status');
+    if (el) { el.textContent = 'שגיאה: ' + m + ' (שורה ' + line + ')'; el.className = 'warn'; }
+  };
+  var BAT = APP.bat, SUF = '_' + BAT;
+  var L = APP.labels;
+  var KEY = 'rtTimerV3' + SUF, GKEY = 'rtGroups' + SUF, MAX = 400, COUNT = 10;
+  var DEFAULT_GROUPS = [];
+  var groups = DEFAULT_GROUPS.slice();
+  var state = { session: null, starts: {}, finishes: [], ended: false, pending: false, countdown: null };
+  var selected = {}, armed = null, armTimer = null, lastSec = null, actx = null;
+  var dirty = false, syncing = false, force = false;
+
+  var $ = function (id) { return document.getElementById(id); };
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function load() {
+    try { var s = JSON.parse(localStorage.getItem(KEY)); if (s && s.session) state = s; } catch (e) {}
+    try { var g = JSON.parse(localStorage.getItem(GKEY)); if (g && g.length) groups = g; } catch (e) {}
+  }
+  function fresh() { return { session: null, starts: {}, finishes: [], ended: false, pending: false, countdown: null }; }
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function base() {
+    var b = null;
+    Object.keys(state.starts).forEach(function (g) { if (b === null || state.starts[g] < b) b = state.starts[g]; });
+    return b !== null ? b : (state.finishes[0] || 0);
+  }
+  function digitsOf(ms) {
+    var t = Math.max(0, Math.floor(ms / 1000));
+    return Math.floor(t / 3600) * 10000 + Math.floor((t % 3600) / 60) * 100 + t % 60;
+  }
+  function elapsed(ms) {
+    var t = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+    return (h ? h + ':' : '') + pad(m) + ':' + pad(s);
+  }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+  function startedCount() { return Object.keys(state.starts).length; }
+  function setStatus(text, warn) { $('status').textContent = text; $('status').className = warn ? 'warn' : ''; }
+
+  function companyGroups() {
+    return groups.filter(function (g) { return g.indexOf(L.company) === 0 && !state.starts[g]; });
+  }
+
+  function renderChips() {
+    var now = Date.now(), html = '';
+    var free = companyGroups();
+    if (free.length > 1 && !state.ended) {
+      var all = free.every(function (g) { return selected[g]; });
+      html += '<button class="chip' + (all ? ' sel' : '') + '" data-i="-1"><bdi>' + esc(L.allCompanies) + '</bdi></button>';
+    }
+    groups.forEach(function (g, i) {
+      var cls = 'chip', extra = '';
+      if (armed === g) { cls += ' arm'; extra = '<bdi>לבטל זינוק?</bdi>'; }
+      else if (state.starts[g]) { cls += ' on'; extra = '<span data-g="' + i + '">' + elapsed(now - state.starts[g]) + '</span>'; }
+      else if (selected[g]) cls += ' sel';
+      html += '<button class="' + cls + '" data-i="' + i + '"><bdi>' + esc(g) + '</bdi>' + extra + '</button>';
+    });
+    $('chips').innerHTML = html;
+  }
+
+  function render() {
+    var started = startedCount() > 0, running = started && !state.ended;
+    var sel = groups.filter(function (g) { return selected[g] && !state.starts[g]; });
+    var cd = !!state.countdown && !state.ended;
+    $('startCard').classList.toggle('hidden', state.ended);
+    $('cd').classList.toggle('hidden', !cd);
+    $('pickCard').classList.toggle('hidden', cd);
+    if (cd) {
+      $('cdGroups').textContent = 'זינוק: ' + state.countdown.groups.join(', ');
+      $('cdNum').textContent = Math.max(1, Math.ceil((state.countdown.at - Date.now()) / 1000));
+    }
+    $('startBtn').disabled = sel.length === 0;
+    $('startBtn').textContent = sel.length ? 'זינוק: ' + sel.join(', ') : (started ? 'בחר קבוצה לזינוק נוסף' : 'בחר קבוצה לזינוק');
+    $('startHint').textContent = cd ? 'ספירה לאחור לזינוק' : started ? 'זינוקים' : 'זינוק: בוחרים קבוצה, לוחצים, ויש ' + COUNT + ' שניות ספירה לאחור';
+    $('finishBtn').classList.toggle('hidden', state.ended);
+    $('finishBtn').disabled = !running;
+    $('nextNum').textContent = running ? 'מספר ' + (state.finishes.length + 1) : 'אחרי הזינוק הראשון';
+    $('undo').classList.toggle('hidden', !running);
+    $('end').classList.toggle('hidden', !running);
+    $('reset').classList.toggle('hidden', !state.ended);
+    $('done').classList.toggle('hidden', !state.ended);
+    if (state.ended) {
+      $('done').innerHTML = '<b>המדידה הסתיימה</b><span>' + state.finishes.length + ' סיומים, ' + startedCount() + ' זינוקים</span>';
+    }
+    var html = '', b0 = base();
+    for (var i = state.finishes.length - 1; i >= 0 && i >= state.finishes.length - 60; i--) {
+      html += '<div class="li"><b>' + (i + 1) + '</b><span>' + elapsed(state.finishes[i] - b0) + '</span></div>';
+    }
+    $('list').innerHTML = html || '<div class="empty">כאן יופיעו הסיומים, עם הזמן מהזינוק הראשון</div>';
+    renderChips();
+  }
+
+  function requestSync() { dirty = true; state.pending = true; save(); setTimeout(doSync, 300); }
+
+  function doSync() {
+    if (syncing || !dirty || !state.session) return;
+    syncing = true; dirty = false;
+    setStatus('שולח לגיליון...', false);
+    var starts = {}, b0 = base();
+    Object.keys(state.starts).forEach(function (g) { starts[g] = digitsOf(state.starts[g] - b0); });
+    google.script.run
+      .withSuccessHandler(function (r) {
+        syncing = false;
+        if (r && r.ok) {
+          force = false;
+          if (!dirty) { state.pending = false; save(); }
+          setStatus('מסונכרן: ' + r.count + ' סיומים, ' + r.started + ' זינוקים', false);
+          if (dirty) doSync();
+        } else if (r && r.reason === 'reset') {
+          state = fresh(); selected = {}; force = false; dirty = false; save(); render();
+          setStatus('הגיליון אופס למדידה חדשה. המדידה הקודמת נמחקה מהטלפון.', true);
+        } else if (r && r.reason === 'has_data') {
+          if (confirm('בגיליון זמנים כבר יש ' + r.count + ' זמנים. למחוק אותם ולהתחיל מדידה חדשה?')) {
+            force = true; dirty = true; doSync();
+          } else {
+            state = fresh(); selected = {}; save(); render();
+            setStatus('המדידה בוטלה. הזמנים בגיליון לא השתנו.', true);
+          }
+        } else {
+          dirty = true; setStatus('שגיאה בשליחה, מנסה שוב', true);
+        }
+      })
+      .withFailureHandler(function () {
+        syncing = false; dirty = true;
+        setStatus('אין חיבור. הזמנים שמורים בטלפון ויישלחו כשיחזור.', true);
+      })
+      .syncB(BAT, state.session, state.finishes.map(function (f) { return digitsOf(f - b0); }), starts, force);
+  }
+
+  function keepAwake() {
+    try { if (navigator.wakeLock && document.visibilityState === 'visible') navigator.wakeLock.request('screen').catch(function () {}); } catch (e) {}
+  }
+  function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 25); } catch (e) {} }
+
+  function unlockAudio() {
+    try {
+      if (!actx) { var C = window.AudioContext || window.webkitAudioContext; if (C) actx = new C(); }
+      if (actx && actx.state === 'suspended') actx.resume();
+    } catch (e) {}
+  }
+  function beep(freq, dur) {
+    try {
+      if (!actx) return;
+      var o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+      o.frequency.value = freq; o.connect(g); g.connect(actx.destination);
+      g.gain.setValueAtTime(0.35, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.start(t); o.stop(t + dur);
+    } catch (e) {}
+  }
+
+  function tickCountdown() {
+    if (!state.countdown) return;
+    var left = state.countdown.at - Date.now();
+    if (left <= 0) { commitCountdown(); return; }
+    var sec = Math.ceil(left / 1000);
+    if (sec !== lastSec) {
+      lastSec = sec; $('cdNum').textContent = sec;
+      beep(sec <= 3 ? 880 : 660, 0.12); buzz(sec <= 3 ? 60 : 25);
+    }
+  }
+  function commitCountdown() {
+    var c = state.countdown; state.countdown = null; lastSec = null;
+    if (!state.ended) c.groups.forEach(function (g) { if (!state.starts[g]) state.starts[g] = c.at; });
+    save(); render(); beep(1320, 0.6); buzz(400); requestSync();
+  }
+
+  $('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip'); if (!b || state.ended) return;
+    clearTimeout(armTimer);
+    if (b.getAttribute('data-i') === '-1') {
+      var free = companyGroups(), all = free.every(function (x) { return selected[x]; });
+      free.forEach(function (x) { selected[x] = !all; });
+      armed = null; render(); return;
+    }
+    var g = groups[Number(b.getAttribute('data-i'))];
+    if (state.starts[g]) {
+      if (armed === g) {
+        armed = null; delete state.starts[g]; save(); requestSync();
+      } else {
+        armed = g; armTimer = setTimeout(function () { armed = null; render(); }, 3000);
+      }
+    } else {
+      armed = null; selected[g] = !selected[g];
+    }
+    render();
+  });
+
+  $('startBtn').addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    var sel = groups.filter(function (g) { return selected[g] && !state.starts[g]; });
+    if (!sel.length || state.ended || state.countdown) return;
+    var now = Date.now();
+    if (!state.session) state.session = now.toString(36) + Math.random().toString(36).slice(2, 8);
+    state.countdown = { at: now + COUNT * 1000, groups: sel };
+    selected = {}; lastSec = null; armed = null;
+    unlockAudio(); save(); render(); keepAwake(); tickCountdown();
+  });
+
+  $('cdCancel').addEventListener('click', function () {
+    if (!state.countdown) return;
+    state.countdown = null; lastSec = null;
+    save(); render(); setStatus('הזינוק בוטל', false);
+  });
+
+  $('finishBtn').addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    if (!startedCount() || state.ended || state.finishes.length >= MAX) return;
+    state.finishes.push(Date.now());
+    save(); render(); buzz(); requestSync();
+  });
+
+  function twoStep(btn, armedText, action) {
+    var timer = null, normal = null;
+    btn.addEventListener('click', function () {
+      if (btn.classList.contains('arm')) {
+        clearTimeout(timer); btn.classList.remove('arm'); btn.textContent = normal; action();
+      } else {
+        normal = btn.textContent; btn.classList.add('arm'); btn.textContent = armedText();
+        timer = setTimeout(function () { btn.classList.remove('arm'); btn.textContent = normal; }, 3000);
+      }
+    });
+  }
+  twoStep($('undo'), function () { return 'לבטל את מספר ' + state.finishes.length + '?'; }, function () {
+    if (!state.finishes.length) return;
+    state.finishes.pop(); save(); render(); requestSync();
+  });
+  twoStep($('end'), function () { return 'לחץ שוב לסיום'; }, function () {
+    state.ended = true; state.countdown = null; save(); render(); requestSync();
+  });
+  twoStep($('reset'), function () { return 'לחץ שוב לאיפוס'; }, function () {
+    state = fresh(); selected = {}; save(); render(); setStatus('', false);
+  });
+
+  document.addEventListener('visibilitychange', function () { if (startedCount() && !state.ended) keepAwake(); });
+
+  $('batLink').textContent = L.unit + ' · החלפה';
+  try { load(); } catch (e) {}
+  render();
+  if (startedCount() && !state.ended) keepAwake();
+  if (state.session && state.pending !== false) { dirty = true; doSync(); }
+  google.script.run.withSuccessHandler(function (g) {
+    if (g && g.length && !startedCount() && !state.countdown) { groups = g; try { localStorage.setItem(GKEY, JSON.stringify(g)); } catch (e) {} render(); }
+  }).getGroupsB(BAT);
+  tickCountdown();
+  setInterval(tickCountdown, 100);
+  setInterval(function () {
+    if (state.ended) return;
+    var now = Date.now(), spans = document.querySelectorAll('#chips span[data-g]');
+    for (var i = 0; i < spans.length; i++) {
+      var t = state.starts[groups[Number(spans[i].getAttribute('data-g'))]];
+      if (t) spans[i].textContent = elapsed(now - t);
+    }
+  }, 1000);
+  setInterval(function () { if (dirty) doSync(); }, 4000);
+</script>
+</body>
+</html>
