@@ -1,6 +1,6 @@
 // נבנה אוטומטית ב-tools/build-app.js. לא לערוך ידנית.
 // האפליקציה נפתחת מהזיכרון של הטלפון (גם בלי קליטה) ומתעדכנת ברקע. בקשות לשרת (Apps Script) לא עוברות כאן.
-const VERSION = 'rt-202611251958';
+const VERSION = 'rt-202611261030';
 const FILES = ["./","index.html","timer.html","names.html","app.js","app.css","manifest.webmanifest","icons/icon-192.png","icons/icon-512.png","icons/maskable-512.png","icons/apple-touch-icon.png"];
 
 self.addEventListener('install', (e) => {
